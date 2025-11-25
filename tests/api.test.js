@@ -130,6 +130,14 @@ test('creates a meal plan and aggregates a grocery list', async () => {
   assert.strictEqual(planRes.status, 201);
   const plan = await planRes.json();
   assert.strictEqual(plan.entries.length, 2);
+  assert.strictEqual(plan.endDate, '2024-04-07');
+
+  const planListRes = await fetch(`${baseUrl}/api/meal-plans`);
+  assert.strictEqual(planListRes.status, 200);
+  const planList = await planListRes.json();
+  const storedPlan = planList.mealPlans.find((entry) => entry.id === plan.id);
+  assert.ok(storedPlan);
+  assert.strictEqual(storedPlan.endDate, '2024-04-07');
 
   const groceryRes = await fetch(`${baseUrl}/api/meal-plans/${plan.id}/grocery-list`);
   assert.strictEqual(groceryRes.status, 200);

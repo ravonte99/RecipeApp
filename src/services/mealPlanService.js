@@ -14,6 +14,14 @@ function scaleIngredients(ingredients, factor) {
   return Array.from(aggregated.values());
 }
 
+function toISODate(dateLike) {
+  const date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date.toISOString().slice(0, 10);
+}
+
 class MealPlanService {
   constructor() {
     this.recipes = recipes;
@@ -37,6 +45,7 @@ class MealPlanService {
   }
 
   createMealPlan({ startDate, entries = [] }) {
+    const start = toISODate(startDate) || toISODate(new Date());
     const planId = randomUUID();
     const normalizedEntries = entries.map((entry) => ({
       ...entry,
@@ -44,10 +53,22 @@ class MealPlanService {
       servings: entry.servings || this.getRecipe(entry.recipeId)?.servings || 2,
     }));
 
+    const latestEntryDate = normalizedEntries.reduce((latest, entry) => {
+      const entryDate = toISODate(entry.date);
+      if (!entryDate) return latest;
+      return entryDate > latest ? entryDate : latest;
+    }, start);
+
+    const startDateObj = new Date(start);
+    const defaultEndDate = new Date(startDateObj);
+    defaultEndDate.setDate(startDateObj.getDate() + 6);
+    const defaultEnd = toISODate(defaultEndDate);
+    const endDate = latestEntryDate > defaultEnd ? latestEntryDate : defaultEnd;
+
     const plan = {
       id: planId,
-      startDate: startDate || new Date().toISOString().slice(0, 10),
-      endDate: '',
+      startDate: start,
+      endDate,
       entries: normalizedEntries,
       createdAt: new Date().toISOString(),
     };
@@ -58,6 +79,10 @@ class MealPlanService {
 
   getMealPlan(id) {
     return this.mealPlans.get(id);
+  }
+
+  listMealPlans() {
+    return Array.from(this.mealPlans.values());
   }
 
   buildGroceryList(planId) {

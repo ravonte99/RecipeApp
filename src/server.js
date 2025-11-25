@@ -159,6 +159,11 @@ function createRequestHandler(retailerService, mealPlanService, shoppingService)
       return;
     }
 
+    if (pathname === '/api/meal-plans' && req.method === 'GET') {
+      sendJson(res, 200, { mealPlans: mealPlanSvc.listMealPlans() });
+      return;
+    }
+
     if (pathname === '/api/meal-plans' && req.method === 'POST') {
       const body = await parseBody(req);
       const plan = mealPlanSvc.createMealPlan({ startDate: body.startDate, entries: body.entries || [] });
