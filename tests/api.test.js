@@ -100,3 +100,41 @@ test('adds items and returns checkout handoff links', async () => {
   assert.ok(checkout.webUrl.includes('checkout'));
   assert.ok(checkout.deepLink.startsWith('retailer://checkout'));
 });
+
+test('surfaces recipe catalog and individual recipe details', async () => {
+  const listRes = await fetch(`${baseUrl}/api/recipes`);
+  assert.strictEqual(listRes.status, 200);
+  const listBody = await listRes.json();
+  assert.ok(Array.isArray(listBody.recipes));
+  assert.ok(listBody.recipes.some((recipe) => recipe.id === 'recipe-italian-pasta'));
+
+  const detailRes = await fetch(`${baseUrl}/api/recipes/recipe-chicken-tacos`);
+  assert.strictEqual(detailRes.status, 200);
+  const recipe = await detailRes.json();
+  assert.strictEqual(recipe.title, 'Citrus Grilled Chicken Tacos');
+  assert.ok(recipe.ingredients.length > 0);
+});
+
+test('creates a meal plan and aggregates a grocery list', async () => {
+  const planRes = await fetch(`${baseUrl}/api/meal-plans`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      startDate: '2024-04-01',
+      entries: [
+        { date: '2024-04-01', mealType: 'dinner', recipeId: 'recipe-italian-pasta', servings: 4 },
+        { date: '2024-04-02', mealType: 'dinner', recipeId: 'recipe-veg-stirfry', servings: 3 },
+      ],
+    }),
+  });
+  assert.strictEqual(planRes.status, 201);
+  const plan = await planRes.json();
+  assert.strictEqual(plan.entries.length, 2);
+
+  const groceryRes = await fetch(`${baseUrl}/api/meal-plans/${plan.id}/grocery-list`);
+  assert.strictEqual(groceryRes.status, 200);
+  const list = await groceryRes.json();
+  const aggregated = list.ingredients.find((item) => item.ingredient === 'garlic');
+  assert.ok(aggregated);
+  assert.ok(aggregated.quantity >= 9); // combines pasta and stir-fry garlic
+});
