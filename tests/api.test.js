@@ -24,12 +24,35 @@ test('exposes assistant capabilities without auto-purchasing', async () => {
   assert.ok(body.unsupportedFlows.includes('auto_purchase'));
 });
 
+test('returns prompts and guardrails for the assistant', async () => {
+  const promptsRes = await fetch(`${baseUrl}/api/assistant/prompts`);
+  assert.strictEqual(promptsRes.status, 200);
+  const prompts = await promptsRes.json();
+  assert.ok(prompts.ingredientParsing);
+  assert.strictEqual(prompts.unitNormalization.deterministicResponse.max_output_tokens, 220);
+
+  const guardrailsRes = await fetch(`${baseUrl}/api/assistant/guardrails`);
+  assert.strictEqual(guardrailsRes.status, 200);
+  const guardrails = await guardrailsRes.json();
+  assert.strictEqual(guardrails.tokenLimits.requestMaxTokens, 2800);
+  assert.ok(Array.isArray(guardrails.retryPolicy.retryableStatusCodes));
+});
+
 test('searches products by zipcode and keyword', async () => {
   const res = await fetch(`${baseUrl}/api/products/search?zipcode=94103&query=milk`);
   assert.strictEqual(res.status, 200);
   const body = await res.json();
   assert.ok(body.products.length > 0);
   assert.ok(body.products.every((p) => p.name.toLowerCase().includes('milk')));
+});
+
+test('returns products across all stores when no filters provided', async () => {
+  const res = await fetch(`${baseUrl}/api/products/search`);
+  assert.strictEqual(res.status, 200);
+  const body = await res.json();
+  assert.ok(body.products.length > 0);
+  const uniqueStoreIds = new Set(body.products.map((p) => p.storeId));
+  assert.ok(uniqueStoreIds.size >= 2);
 });
 
 test('creates cart and surfaces substitution fallbacks', async () => {
