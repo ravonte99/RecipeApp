@@ -147,6 +147,31 @@ test('creates a meal plan and aggregates a grocery list', async () => {
   assert.ok(aggregated.quantity >= 9); // combines pasta and stir-fry garlic
 });
 
+test('aligns meal plan dates with entries to avoid scheduling conflicts', async () => {
+  const planRes = await fetch(`${baseUrl}/api/meal-plans`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      entries: [
+        { date: '2024-06-12', mealType: 'dinner', recipeId: 'recipe-veg-stirfry', servings: 2 },
+        { mealType: 'lunch', recipeId: 'recipe-italian-pasta', servings: 2 },
+        { date: '2024-06-15', mealType: 'dinner', recipeId: 'recipe-chicken-tacos', servings: 3 },
+      ],
+    }),
+  });
+
+  assert.strictEqual(planRes.status, 201);
+  const plan = await planRes.json();
+  assert.strictEqual(plan.startDate, '2024-06-12');
+  assert.strictEqual(plan.endDate, '2024-06-18');
+  assert.ok(plan.entries.every((entry) => entry.date));
+
+  const dates = plan.entries.map((entry) => entry.date);
+  assert.ok(dates.includes('2024-06-12'));
+  assert.ok(dates.includes('2024-06-15'));
+  assert.deepStrictEqual([...dates].sort(), dates); // entries sorted chronologically
+});
+
 test('builds a cart from a meal plan for a chosen store', async () => {
   const planRes = await fetch(`${baseUrl}/api/meal-plans`, {
     method: 'POST',

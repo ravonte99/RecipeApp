@@ -45,15 +45,31 @@ class MealPlanService {
   }
 
   createMealPlan({ startDate, entries = [] }) {
-    const start = toISODate(startDate) || toISODate(new Date());
     const planId = randomUUID();
     const normalizedEntries = entries.map((entry) => ({
       ...entry,
       id: randomUUID(),
+      date: toISODate(entry.date),
       servings: entry.servings || this.getRecipe(entry.recipeId)?.servings || 2,
     }));
 
-    const latestEntryDate = normalizedEntries.reduce((latest, entry) => {
+    const earliestEntryDate = normalizedEntries.reduce((earliest, entry) => {
+      if (!entry.date) return earliest;
+      if (!earliest || entry.date < earliest) return entry.date;
+      return earliest;
+    }, null);
+
+    const start = toISODate(startDate) || earliestEntryDate || toISODate(new Date());
+    const entriesWithDates = normalizedEntries.map((entry) => ({ ...entry, date: entry.date || start }));
+
+    entriesWithDates.sort((a, b) => {
+      if (a.date === b.date) {
+        return (a.mealType || '').localeCompare(b.mealType || '');
+      }
+      return a.date > b.date ? 1 : -1;
+    });
+
+    const latestEntryDate = entriesWithDates.reduce((latest, entry) => {
       const entryDate = toISODate(entry.date);
       if (!entryDate) return latest;
       return entryDate > latest ? entryDate : latest;
@@ -69,7 +85,7 @@ class MealPlanService {
       id: planId,
       startDate: start,
       endDate,
-      entries: normalizedEntries,
+      entries: entriesWithDates,
       createdAt: new Date().toISOString(),
     };
 
