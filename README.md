@@ -44,6 +44,17 @@
 - Temperature-check all model outputs; reject if quantities or units are missing.
 - Cache high-traffic prompts (ingredient extraction) with request hashing.
 - Enforce max-tokens and strict schemas to limit hallucinations and spending.
+
+### Deterministic Parsing & Hidden Reasoning
+- **Ingredient parsing prompt**: Uses a hidden `<scratchpad>` for chain-of-thought and emits JSON matching the schema in `src/data/assistantPrompts.js`. Output is deterministic (`temperature=0`, `top_p=0`, penalties zero) and limited to the schema fields.
+- **Unit normalization prompt**: Converts to grams/milliliters/pieces with rationale, also using hidden `<scratchpad>` reasoning and deterministic settings.
+- **Output contract**: Both prompts forbid prose responses and must conform to the published JSON schema for reliable downstream parsing.
+
+### Guardrails
+- **Token limits**: Requests capped at ~2.8k tokens with response caps (~900) via `max_output_tokens` to prevent overruns.
+- **Retries with backoff**: Up to three attempts with exponential backoff for transient failures (429/5xx/timeout).
+- **Content filtering**: Pre/post-call moderation across hate, self-harm, sexual, and violence categories; return a safe rejection message if blocked.
+- **Cost monitoring**: Per-request and daily spend ceilings ($0.05 / $12) with logging and alerts at 50/80/95% thresholds.
 ## Scope Confirmation
 - **Recipe sources:** Support both curated in-app recipes and user-imported URLs. Imported links are parsed into structured recipes and saved alongside curated content for reuse.
 - **Weekly meal planning:** Default plan covers **7 meals per week** with a default of **4 servings per meal**; both numbers are user-editable per week or per recipe.
@@ -67,6 +78,8 @@ Run `npm start` to boot the lightweight HTTP server (no external dependencies). 
 - `POST /api/cart` – create a cart with `{ storeId, zipcode?, items: [{ sku, quantity, unit?, category? }] }`. Response includes any `fallbacks` when SKUs are missing or out of stock.
 - `POST /api/cart/:id/items` – append items to an existing cart with the same validation/fallback flow.
 - `POST /api/cart/:id/checkout` – return a retailer web URL plus an app deep link for checkout handoff.
+- `GET /api/assistant/prompts` – retrieve deterministic parsing/normalization prompts with JSON schemas.
+- `GET /api/assistant/guardrails` – retrieve token limits, retry policy, safety filters, and spend caps.
 
 **Assistant limitations:** GPT-backed flows can help search for SKUs and stage carts, but automatic purchasing is **disabled**. Users must review carts and complete checkout in the retailer experience.
 

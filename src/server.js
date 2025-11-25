@@ -53,6 +53,18 @@ function createRequestHandler(service = new RetailerService()) {
       return;
     }
 
+    if (pathname === '/api/assistant/prompts' && req.method === 'GET') {
+      const prompts = service.getAssistantPrompts();
+      sendJson(res, 200, prompts);
+      return;
+    }
+
+    if (pathname === '/api/assistant/guardrails' && req.method === 'GET') {
+      const guardrails = service.getAssistantGuardrails();
+      sendJson(res, 200, guardrails);
+      return;
+    }
+
     if (pathname === '/api/stores' && req.method === 'GET') {
       const zipcode = searchParams.get('zipcode') || '';
       const matches = service.findStoresByZip(zipcode);

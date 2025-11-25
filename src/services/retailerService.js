@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto');
 const { stores, catalog } = require('../data/retailerData');
+const { assistantPrompts, guardrailPolicies } = require('../data/assistantPrompts');
 
 class RetailerService {
   constructor() {
@@ -16,7 +17,17 @@ class RetailerService {
       requiresUserReview: true,
       supportedFlows: ['store_lookup', 'product_search', 'cart_building', 'checkout_handoff'],
       unsupportedFlows: ['auto_purchase', 'payment_processing'],
+      prompts: assistantPrompts,
+      guardrails: guardrailPolicies,
     };
+  }
+
+  getAssistantPrompts() {
+    return assistantPrompts;
+  }
+
+  getAssistantGuardrails() {
+    return guardrailPolicies;
   }
 
   findStoresByZip(zipcode) {
