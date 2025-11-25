@@ -89,3 +89,7 @@ Carts are kept in memory for now and scoped to a chosen store. The substitution 
 - **Planner, picker, grocery list, and checkout surfaces**: see `docs/wireframes.md` for low-fidelity flows covering the weekly calendar, recipe picker/importer, grocery list review, and cart confirmation handoff.
 - **Credentials and preferences**: includes wireframes for OpenAI key/OAuth capture, store selector, dietary tags, and budget controls.
 - **Offline and refresh behaviors**: documents draft mode, background price/availability refresh, and user controls for manual refreshes.
+
+## Testing and rollout
+- **Automated coverage**: Unit tests for parsing/normalization prompts, integration tests against the sandbox retailer APIs, and SwiftUI UI tests for the planner-to-cart flow. See `docs/testing_and_rollout.md` for scope and tooling details.
+- **Beta strategy**: Private TestFlight rollout with retailer-specific feature flags and clear exit criteria before broad launch; rollout details live in `docs/testing_and_rollout.md`.
