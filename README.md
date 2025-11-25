@@ -58,3 +58,16 @@
 3. **Normalize to SKUs** – backend maps normalized ingredients to Kroger product SKUs (per store/zipcode) using search + substitution rules.
 4. **Review cart** – user reviews mapped items, substitutes or removes products, and sees cost estimates.
 5. **Checkout handoff** – backend creates a Kroger cart and hands off the cart/redirect URL for final payment within the partner flow.
+
+## Backend API prototype
+Run `npm start` to boot the lightweight HTTP server (no external dependencies). Key endpoints:
+
+- `GET /api/stores?zipcode=94103` – find available stores for a ZIP.
+- `GET /api/products/search?zipcode=94103&query=milk` – search a store catalog for products with price and stock metadata.
+- `POST /api/cart` – create a cart with `{ storeId, zipcode?, items: [{ sku, quantity, unit?, category? }] }`. Response includes any `fallbacks` when SKUs are missing or out of stock.
+- `POST /api/cart/:id/items` – append items to an existing cart with the same validation/fallback flow.
+- `POST /api/cart/:id/checkout` – return a retailer web URL plus an app deep link for checkout handoff.
+
+**Assistant limitations:** GPT-backed flows can help search for SKUs and stage carts, but automatic purchasing is **disabled**. Users must review carts and complete checkout in the retailer experience.
+
+Carts are kept in memory for now and scoped to a chosen store. The substitution logic surfaces up to three in-stock alternatives per item and always allows manual edits when a SKU cannot be fulfilled.

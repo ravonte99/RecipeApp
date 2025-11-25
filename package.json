@@ -1,0 +1,14 @@
+{
+  "name": "recipeapp",
+  "version": "1.0.0",
+  "description": "- **Client**: Native **SwiftUI** iOS app targeting iOS 17+ for modern UI components, async/await networking, and on-device caching. - **Backend**: Lightweight **Node.js (Express)** or **Fastify** service deployed behind HTTPS. Responsibilities:   - Proxy OpenAI requests with server-side API key management.   - Store encrypted retailer API tokens and user auth credentials (e.g., via PostgreSQL + KMS-managed encryption keys).   - Provide endpoints for recipe CRUD, meal plans, shopping carts, and retailer SKU lookups.   - Rate-limiting, auditing, and observability (structured logs + traces) to guard model usage.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
