@@ -42,7 +42,9 @@ class RetailerService {
   searchProducts({ query, storeId, zipcode }) {
     const storesForLookup = storeId
       ? [this.getStore(storeId)].filter(Boolean)
-      : this.findStoresByZip(zipcode);
+      : zipcode
+      ? this.findStoresByZip(zipcode)
+      : this.stores;
 
     const results = [];
     storesForLookup.forEach((store) => {
