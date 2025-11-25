@@ -154,6 +154,13 @@ test('returns 404 when grocery list is requested for a missing plan', async () =
   assert.strictEqual(body.error, 'meal_plan_not_found');
 });
 
+test('returns 404 when a meal plan is requested by id that does not exist', async () => {
+  const res = await fetch(`${baseUrl}/api/meal-plans/non-existent-plan`);
+  assert.strictEqual(res.status, 404);
+  const body = await res.json();
+  assert.strictEqual(body.error, 'meal_plan_not_found');
+});
+
 test('aligns meal plan dates with entries to avoid scheduling conflicts', async () => {
   const planRes = await fetch(`${baseUrl}/api/meal-plans`, {
     method: 'POST',
