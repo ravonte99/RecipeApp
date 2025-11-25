@@ -71,3 +71,8 @@ Run `npm start` to boot the lightweight HTTP server (no external dependencies). 
 **Assistant limitations:** GPT-backed flows can help search for SKUs and stage carts, but automatic purchasing is **disabled**. Users must review carts and complete checkout in the retailer experience.
 
 Carts are kept in memory for now and scoped to a chosen store. The substitution logic surfaces up to three in-stock alternatives per item and always allows manual edits when a SKU cannot be fulfilled.
+
+## UX wireframes
+- **Planner, picker, grocery list, and checkout surfaces**: see `docs/wireframes.md` for low-fidelity flows covering the weekly calendar, recipe picker/importer, grocery list review, and cart confirmation handoff.
+- **Credentials and preferences**: includes wireframes for OpenAI key/OAuth capture, store selector, dietary tags, and budget controls.
+- **Offline and refresh behaviors**: documents draft mode, background price/availability refresh, and user controls for manual refreshes.
