@@ -147,6 +147,13 @@ test('creates a meal plan and aggregates a grocery list', async () => {
   assert.ok(aggregated.quantity >= 9); // combines pasta and stir-fry garlic
 });
 
+test('returns 404 when grocery list is requested for a missing plan', async () => {
+  const res = await fetch(`${baseUrl}/api/meal-plans/missing-plan/grocery-list`);
+  assert.strictEqual(res.status, 404);
+  const body = await res.json();
+  assert.strictEqual(body.error, 'meal_plan_not_found');
+});
+
 test('aligns meal plan dates with entries to avoid scheduling conflicts', async () => {
   const planRes = await fetch(`${baseUrl}/api/meal-plans`, {
     method: 'POST',

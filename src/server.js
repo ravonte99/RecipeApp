@@ -190,6 +190,10 @@ function createRequestHandler(retailerService, mealPlanService, shoppingService)
 
       if (action === 'grocery-list') {
         const groceryList = mealPlanSvc.buildGroceryList(planId);
+        if (groceryList.error === 'meal_plan_not_found') {
+          sendJson(res, 404, { error: 'meal_plan_not_found' });
+          return;
+        }
         sendJson(res, 200, groceryList);
         return;
       }
